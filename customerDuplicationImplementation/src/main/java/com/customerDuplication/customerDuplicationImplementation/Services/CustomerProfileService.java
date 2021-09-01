@@ -1,11 +1,13 @@
 package com.customerDuplication.customerDuplicationImplementation.Services;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;	
+import java.util.UUID;
 
+import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
@@ -18,6 +20,9 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.core.CountRequest;
+import org.elasticsearch.client.core.CountResponse;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -26,8 +31,6 @@ import org.springframework.stereotype.Service;
 
 import com.customerDuplication.customerDuplicationImplementation.Models.CustomerProfileDocument;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-
 
 @Service
 public class CustomerProfileService {
@@ -120,4 +123,55 @@ public class CustomerProfileService {
         return objectMapper.convertValue(profileDocument, Map.class);
     }
 	
+	public List<CustomerProfileDocument> searchByPhoneNumber(String phoneNumber) throws Exception {
+
+        SearchRequest searchRequest = new SearchRequest("profiles");
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+
+        QueryBuilder queryBuilder = QueryBuilders
+                .boolQuery()
+                .must(QueryBuilders
+                        .matchQuery("phoneNumber", phoneNumber));
+
+        searchSourceBuilder.query(QueryBuilders.termQuery("phoneNumber", phoneNumber));
+        searchSourceBuilder.size(5);
+
+        searchRequest.source(searchSourceBuilder);
+
+        SearchResponse response =
+                client.search(searchRequest, RequestOptions.DEFAULT);
+
+        return getSearchResult(response);
+    }
+	
+	public long getMatchingPhoneNumberCount(String phoneNumber) throws IOException {
+		CountRequest countRequest = new CountRequest("profiles");
+		countRequest.query(QueryBuilders.termQuery("phoneNumber", phoneNumber));
+		CountResponse response = client.count(countRequest, RequestOptions.DEFAULT);
+		return response.getCount();
+	}
+	
+	public long getMatchingPanNumberCount(String panNumber) throws IOException {
+		CountRequest countRequest = new CountRequest("profiles");
+		countRequest.query(QueryBuilders.termQuery("panNumber", panNumber));
+		System.out.println(panNumber);
+		CountResponse response = client.count(countRequest, RequestOptions.DEFAULT);
+		return response.getCount();
+	}
+	
+	public boolean isDuplicatePhoneNumber(String phoneNumber) throws IOException {
+		if (getMatchingPhoneNumberCount(phoneNumber) != 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public boolean isDuplicatePanNumber(String panNumber) throws IOException {
+		if (getMatchingPanNumberCount(panNumber) != 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 }

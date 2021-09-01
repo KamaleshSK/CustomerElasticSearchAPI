@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.customerDuplication.customerDuplicationImplementation.Models.CustomerProfileDocument;
@@ -49,5 +50,29 @@ public class CustomerProfileController {
          return service.deleteProfileDocument(id);
 
     }
+    
+    @GetMapping(value = "profiles/search")
+    public List<CustomerProfileDocument> search(@RequestParam(value = "phoneNumber") String phoneNumber) throws Exception {
+    	return service.searchByPhoneNumber(phoneNumber);
+    }
+    
+    @GetMapping(value = "profiles/countPhoneNumber")
+    public long countPhoneNumberMatches(@RequestParam(value = "phoneNumber") String phoneNumber) throws Exception {
+    	return service.getMatchingPhoneNumberCount(phoneNumber);
+    }
+    
+    @GetMapping(value = "profiles/countPanNumber")
+    public long countPanNumberMatches(@RequestParam(value = "panNumber") String panNumber) throws Exception {
+    	return service.getMatchingPanNumberCount(panNumber);
+    }
 	
+    @GetMapping(value = "profiles/duplicateCheckPhoneNumber")
+    public boolean isDuplicatePhoneNumber(@RequestParam(value = "phoneNumber") String phoneNumber) throws Exception {
+    	return service.isDuplicatePhoneNumber(phoneNumber);
+    }
+    
+    @GetMapping(value = "profiles/duplicateCheckPanNumber")
+    public boolean isDuplicatePanNumber(@RequestParam(value = "panNumber") String panNumber) throws Exception {
+    	return service.isDuplicatePanNumber(panNumber);
+    }
 }

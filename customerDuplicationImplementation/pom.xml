@@ -37,7 +37,26 @@
 			<artifactId>elasticsearch-rest-high-level-client</artifactId>
 			<version>${elasticsearch.version}</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-elasticsearch -->
+		<dependency>
+    		<groupId>com.amazonaws</groupId>
+    		<artifactId>aws-java-sdk-elasticsearch</artifactId>
+    		<version>1.12.57</version>
+		</dependency>		
+		<!-- https://mvnrepository.com/artifact/com.github.awslabs/aws-request-signing-apache-interceptor -->
+		<dependency>
+		    <groupId>com.github.awslabs</groupId>
+		    <artifactId>aws-request-signing-apache-interceptor</artifactId>
+		    <version>f39dfaf107</version>
+		</dependency>
 	</dependencies>
+	
+	<repositories>
+		<repository>
+		    <id>jitpack.io</id>
+		    <url>https://jitpack.io</url>
+		</repository>
+	</repositories>
 
 	<build>
 		<plugins>
