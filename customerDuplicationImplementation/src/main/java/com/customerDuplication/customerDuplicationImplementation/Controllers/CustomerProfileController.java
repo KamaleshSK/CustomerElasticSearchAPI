@@ -25,37 +25,50 @@ public class CustomerProfileController {
 	@Autowired
 	private CustomerProfileService service;
 	
+	//Create a new customer profile
 	@PostMapping("/profiles")
 	public ResponseEntity<String> createCustomerProfile(@RequestBody CustomerProfileDocument document) throws Exception {
 		return new ResponseEntity<String>(service.createProfileDocument(document), HttpStatus.CREATED);
 	}
 	
+	//get customer profile details by id
     @GetMapping("/profiles/{id}")
     public CustomerProfileDocument findById(@PathVariable String id) throws Exception {
         return service.findById(id);
     }
     
+    //update details of an existing customer profile
     @PutMapping("/profiles")
     public ResponseEntity<String> updateProfile(@RequestBody CustomerProfileDocument document) throws Exception {
         return new ResponseEntity<String>(service.updateProfile(document), HttpStatus.CREATED);
     }
     
+    //get all customer profiles details
     @GetMapping("/profiles")
     public List<CustomerProfileDocument> findAll() throws Exception {
            return service.findAll();
     }
     
+    //delete customer profile by id
     @DeleteMapping("profiles/{id}")
     public String deleteProfile(@PathVariable String id) throws Exception {
          return service.deleteProfileDocument(id);
-
     }
     
+    //delete all customer profiles
+    //currently work in progress; status:
+    @DeleteMapping("profiles")
+    public String deleteAllProfiles() throws Exception {
+    	return service.deleteAll();
+    }
+    
+    //search customer profile by unique phone number
     @GetMapping(value = "profiles/search")
     public List<CustomerProfileDocument> search(@RequestParam(value = "phoneNumber") String phoneNumber) throws Exception {
     	return service.searchByPhoneNumber(phoneNumber);
     }
     
+    //
     @GetMapping(value = "profiles/countPhoneNumber")
     public long countPhoneNumberMatches(@RequestParam(value = "phoneNumber") String phoneNumber) throws Exception {
     	return service.getMatchingPhoneNumberCount(phoneNumber);

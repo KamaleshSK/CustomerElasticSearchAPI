@@ -24,6 +24,8 @@ import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,11 @@ public class CustomerProfileService {
 	private ObjectMapper objectMapper;
 	
 	public String createProfileDocument(CustomerProfileDocument document) throws Exception {
+		
+		//check if customer profile already exists
+		if (isCustomerProfileDuplicate(document.getPhoneNumber(), document.getPanNumber())) {
+			return "Customer Profile already exists";
+		}
 		
 		UUID uuid = UUID.randomUUID();
 		document.setId(uuid.toString());
@@ -93,6 +100,14 @@ public class CustomerProfileService {
 
         return getSearchResult(searchResponse);
     }
+	
+	public String deleteAll() throws Exception {
+		
+		DeleteByQueryRequest request = new DeleteByQueryRequest("profiles"); 
+		BulkByScrollResponse bulkResponse = client.deleteByQuery(request, RequestOptions.DEFAULT);
+		System.out.println(bulkResponse);
+		return "All documents deleted Successfully";
+	}
 	
 	private List<CustomerProfileDocument> getSearchResult(SearchResponse response) {
 
@@ -153,8 +168,8 @@ public class CustomerProfileService {
 	
 	public long getMatchingPanNumberCount(String panNumber) throws IOException {
 		CountRequest countRequest = new CountRequest("profiles");
-		countRequest.query(QueryBuilders.termQuery("panNumber", panNumber));
-		System.out.println(panNumber);
+		// elasticseach apparently indexes HXIPK6679D as hxipk6679d (note the lower casing)
+		countRequest.query(QueryBuilders.termQuery("panNumber", panNumber.toLowerCase()));
 		CountResponse response = client.count(countRequest, RequestOptions.DEFAULT);
 		return response.getCount();
 	}
@@ -169,6 +184,14 @@ public class CustomerProfileService {
 	
 	public boolean isDuplicatePanNumber(String panNumber) throws IOException {
 		if (getMatchingPanNumberCount(panNumber) != 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public boolean isCustomerProfileDuplicate(String phoneNumber, String panNumber) throws IOException {
+		if (isDuplicatePhoneNumber(phoneNumber) || isDuplicatePanNumber(panNumber)) {
 			return true;
 		} else {
 			return false;
