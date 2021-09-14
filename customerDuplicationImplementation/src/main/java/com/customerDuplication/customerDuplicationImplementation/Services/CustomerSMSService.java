@@ -78,7 +78,7 @@ public class CustomerSMSService {
 		SearchRequest searchRequest = new SearchRequest("smsdata");
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(QueryBuilders.matchAllQuery());
-        searchSourceBuilder.size(30); 
+        searchSourceBuilder.size(250); 
         searchRequest.source(searchSourceBuilder);
 
         SearchResponse searchResponse =
