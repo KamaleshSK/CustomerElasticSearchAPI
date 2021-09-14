@@ -28,6 +28,11 @@ public class CustomerSMSController {
 		return new ResponseEntity<String>(service.createSMSDocument(document), HttpStatus.CREATED);
 	}
 	
+	@PostMapping("/smsprofiles/bulk") 
+	public ResponseEntity<String> createBulkCustomerSMS(@RequestBody List<CustomerSMSDocument> documentList) throws Exception {
+		return new ResponseEntity<String>(service.createBulkSMSDocument(documentList), HttpStatus.CREATED);
+	}
+	
 	//get all customer profiles details
     @GetMapping("/smsprofiles")
     public List<CustomerSMSDocument> findAll() throws Exception {

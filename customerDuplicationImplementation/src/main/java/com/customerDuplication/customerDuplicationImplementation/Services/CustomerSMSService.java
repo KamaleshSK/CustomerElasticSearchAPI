@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
@@ -21,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.customerDuplication.customerDuplicationImplementation.Models.CustomerSMSDocument;
+import com.customerDuplication.customerDuplicationImplementation.Utils.RandomStringGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -31,6 +34,9 @@ public class CustomerSMSService {
 	
 	@Autowired
 	private ObjectMapper objectMapper;
+	
+	@Autowired
+	private RandomStringGenerator randomStringGenerator;
 
 	public String createSMSDocument(CustomerSMSDocument document) throws IOException {
 		
@@ -43,6 +49,28 @@ public class CustomerSMSService {
 		IndexResponse indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
 		
 		return indexResponse.getResult().name();
+	}
+	
+	public String createBulkSMSDocument(List<CustomerSMSDocument> documentList) throws IOException {
+		
+		BulkRequest request = new BulkRequest("smsdata");
+		
+		for (int i=0; i<documentList.size(); i++) {
+			CustomerSMSDocument document = documentList.get(i);
+			
+			UUID uuid = UUID.randomUUID();
+			document.setId(uuid.toString());
+			
+			document.setName(randomStringGenerator.generateRandomString());
+			
+			Map<String, Object> documentMapper = objectMapper.convertValue(document, Map.class);
+			
+			request.add(new IndexRequest("smsdata").id(document.getId()).source(documentMapper));
+		}
+		
+		BulkResponse bulkResponse = client.bulk(request, RequestOptions.DEFAULT);
+
+		return bulkResponse.getItems().getClass().getName();
 	}
 
 	public List<CustomerSMSDocument> findAll() throws IOException {
@@ -81,6 +109,8 @@ public class CustomerSMSService {
         return getSearchResult(response);
 	}
 	
+	
+	
 	private List<CustomerSMSDocument> getSearchResult(SearchResponse response) {
 
         SearchHit[] searchHit = response.getHits().getHits();
@@ -97,5 +127,7 @@ public class CustomerSMSService {
 
         return smsDocuments;
     }
+
+	
 
 }
