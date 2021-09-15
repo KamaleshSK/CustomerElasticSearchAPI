@@ -96,10 +96,13 @@ public class CustomerSMSService {
         QueryBuilder queryBuilder = QueryBuilders
                 .boolQuery()
                 .mustNot(QueryBuilders
-                        .termsQuery("sms", keywordList));
+                        .termsQuery("sms", new ArrayList<String>(List.of(
+                        		"credited", "debited", "transferred", "payment", "deposit", "withdrawal", "auto-debit",
+                        		 "upi", "neft", "imps", "rtgs", "emi", "withdrawn", "deposited"
+                        		))));
 
         searchSourceBuilder.query(queryBuilder);
-        searchSourceBuilder.size(30);
+        searchSourceBuilder.size(250);
 
         searchRequest.source(searchSourceBuilder);
 
